@@ -1,0 +1,20 @@
+<div class="container mt-4">
+    <h1>Available Item</h1>
+    <div class="container mt-5">
+        <div class="row">
+            {{#each products}}
+            <div class="col-3 mb-4">
+                <div class="card" style="width: 18rem;">
+                    <img src="{{productImage}}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">{{productName}}</h5>
+                        <p class="card-text">{{price}} VNĐ</p>
+                        <p class="card-text">{{quantity}} {{unit}}</p>
+                        <a href="#" data-image="{{productImage}}" data-id="{{productID}}" data-price="{{price}}" data-name="{{productName}}" data-quantity="{{quantity}}" class="btn btn-primary click-to-buy-now">Buy now</a>
+                    </div>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</div>
