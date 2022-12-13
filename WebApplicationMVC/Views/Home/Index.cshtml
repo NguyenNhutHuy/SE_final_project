@@ -1,0 +1,139 @@
+﻿@model IEnumerable<WebApplicationMVC.Models.ProductClass>
+
+@{
+    ViewBag.Title = "Home Page";
+}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Order <span style="font-size:13px">for agent</span></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="/Home/OrderList">Your history</a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="#">Hi! @HttpContext.Current.Session["username"].ToString()</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="/Home/Logout">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="row">
+    <div class="col-8">
+        <h2 class="ms-3">Some available supplement facts foods</h2>
+        <table border="1" cellpadding="10" cellspacing="10" style="border-collapse: collapse; margin: auto; height: 600px; width: 960px; overflow-y: scroll; display: block; ">
+            <tr class="header">
+                <td></td>
+                <td></td>
+                <td>Product ID</td>
+                <td>Product name</td>
+                <td>Available</td>
+                <td>Price</td>
+                <td>Order quantity</td>
+            </tr>
+            @foreach (var product in Model)
+            {
+                <tr>
+                    <td>
+                        <div class="form-check">
+                            <input class="form-check-input choice-to-buy" data-id="@product.productID" type="checkbox" value="" id="flexCheckChecked">
+                        </div>
+                    </td>
+                    <td>
+                        <img src="@product.productImage"
+                             alt="">
+                    </td>
+                    <td>@product.productID</td>
+                    <td>@product.productName</td>
+                    <td>@product.quantity</td>
+                    <td>
+                        @string.Format("{0:C}", @product.price)
+                    </td>
+                    <td>
+                        <div class="input-group">
+                            <input style="width: 50px;" data-id="@product.productID" data-price="@product.price" min="0" type="number" readonly value="0" class="form-control quantity-to-buy" aria-label="Username"
+                                   aria-describedby="basic-addon1">
+                        </div>
+                    </td>
+                </tr>
+            }
+        </table>
+
+    </div>
+    <div class="col-4">
+        <div class="mb-5">
+            <h3 class="m-0 mb-1">Payment menthod</h3>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="paymentMenthod" value="byCash" id="flexRadioDefault1" checked>
+                <label class="form-check-label" for="flexRadioDefault1">
+                    Payment in cash
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="paymentMenthod" value="byMomo" id="flexRadioDefault2">
+                <label class="form-check-label" for="flexRadioDefault2">
+                    Momo
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="paymentMenthod" value="byZaloPay" id="flexRadioDefault3">
+                <label class="form-check-label" for="flexRadioDefault3">
+                    Zalo pay
+                </label>
+            </div>
+        </div>
+
+        <div class="mb-5">
+            <h3 class="m-0 mb-1">Delivery address</h3>
+            <div class="mb-3">
+                <input type="email" class="form-control" id="deliveryAddress" value="@HttpContext.Current.Session["address"]" placeholder="address">
+            </div>
+        </div>
+
+        <div class="mb-5">
+            <h3 class="m-0 mb-1">Phone number</h3>
+            <div class="mb-3">
+                <input type="text" class="form-control" id="phoneNumber" value="@HttpContext.Current.Session["phoneNumber"]" placeholder="phone number">
+            </div>
+        </div>
+
+        <div class="mb-5">
+            <h3 class="m-0 mb-1">Total: </h3>
+            <span id="total_area">$0.00</span>
+        </div>
+
+        <div class="mt-5">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmModal">Order</button>
+        </div>
+    </div>  
+</div>
+
+<div class="modal fade" id="confirmModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                Confirm order
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button id="btn_order" type="button" class="btn btn-primary">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
+<footer class="ps-3">
+    <p>&copy; @DateTime.Now.Year - Luan Huy Co.,Ltd</p>
+</footer>

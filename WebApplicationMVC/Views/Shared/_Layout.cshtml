@@ -1,0 +1,223 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    @*@Styles.Render("~/Content/css")
+        @Scripts.Render("~/bundles/modernizr") *@
+    <style>
+        td {
+            border: 1px solid;
+            text-align: center;
+        }
+
+        img {
+            height: 150px;
+        }
+
+        table::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        table::-webkit-scrollbar-track {
+            background-color: #e4e4e4;
+            border-radius: 100px;
+        }
+
+        table::-webkit-scrollbar-thumb {
+            background-color: #504b44;
+            border-radius: 100px;
+        }
+    </style>
+
+
+</head>
+<body>
+
+    @RenderBody()
+
+    <!-- Modal -->
+    <div class="modal show" id="agentInvoiceDetailModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" >
+        <div class="modal-dialog" style="max-width: 1000px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Order detail</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table id="contentOrderDetail" border="1" cellpadding="10" cellspacing="10" style="border-collapse: collapse; margin: auto; 
+                           height: 300px; width: 750px; overflow-y: scroll; display: block;" >
+                    </table>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    @RenderSection("scripts", required: false)
+
+    <script src="https://code.jquery.com/jquery-3.6.1.js" integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
+
+    <script>
+        const state = {
+            cart: [],
+            total: 0
+        }
+
+        document.onclick = (e) => {
+            if (e.target.className == 'form-check-input choice-to-buy') {
+                var choiceProduct = document.querySelector("input[data-id=" + e.target.getAttribute('data-id') + "][class='form-control quantity-to-buy']")
+                if (e.target.checked) {
+                    choiceProduct.readOnly = false
+                    choiceProduct.value = 1
+
+
+                    var infoItem = {
+                        productID: choiceProduct.getAttribute('data-id'),
+                        price: choiceProduct.getAttribute('data-price'),
+                        quantity: choiceProduct.value
+                    }
+
+                    state.cart.push(infoItem)
+                    state.total = computeTotal(state.cart)
+                    document.querySelector('#total_area').innerHTML = formatter.format(state.total)
+
+                } else {
+                    choiceProduct.readOnly = true
+                    choiceProduct.value = 0
+
+                    for (let index = 0; index < state.cart.length; index++) {
+                        const infoItem = state.cart[index];
+                        if (infoItem.productID === e.target.getAttribute('data-id')) {
+                            state.cart.splice(index, 1)
+                        }
+                    }
+                    state.total = computeTotal(state.cart)
+                    document.querySelector('#total_area').innerHTML = formatter.format(state.total)
+                }
+            }
+
+            if (e.target.className === 'show-agent-order-detail') {
+                e.preventDefault()
+                console.log('hello world')
+                var invoiceID = e.target.getAttribute('data-id')
+
+                $.ajax({
+                    type: "POST",
+                    url: '/Home/GetOrderDetail',
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(
+                        {
+                            invoiceID
+                        }),
+
+                    success: function (result) {
+                        var html = `
+                            <tr class="header" style="border: none">
+                                <td>Order ID</td>
+                                <td>Product Image</td>
+                                <td>Product Name</td>
+                                <td>Order date</td>
+                                <td>Order quantity</td>
+                                <td></td>
+                            </tr>
+                            `
+                        for (var i = 0; i < result.length; i++) {
+                            var item = result[i]
+                            html += `<tr>
+                                <td>${item.productID}</td>
+                                <td>
+                                    <img src="${item.productImage}" width="100" style="height:120px">
+                                </td>              
+                                <td>${item.productName}</td>
+                                <td>${formatter.format(item.orderPrice)}</td>
+                                <td>${item.orderQuantity}</td>
+                                <td>${formatter.format(item.total)}</td>
+                            </tr>`
+                        }
+
+                        document.querySelector('#contentOrderDetail').innerHTML = html
+
+                        var myModal = new bootstrap.Modal(document.getElementById('agentInvoiceDetailModal'), {
+                            keyboard: false
+                        })
+                        myModal.show()
+                    },
+
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        alert('Some thing wrongssome things wrong. Please try again!')
+                        console.log(errorThrown)
+                    }
+                });
+            }
+
+            if (e.target.id === 'btn_order') {
+
+                var paymentMethod = document.querySelector('input[name="paymentMenthod"]:checked').value
+                var address = document.querySelector('#deliveryAddress').value
+
+                $.ajax({
+                    type: "POST",
+                    url: '/Home/getOrder',
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify(
+                        {
+                            paymentMethod,
+                            address,
+                            CartDetails: state.cart
+                        }),
+
+                    success: function (result) {
+                        location.href = ('https://localhost:44397/Home/orderSuccess')
+                    },
+
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        alert('Some thing wrongssome things wrong. Please try again!')
+                        alert(errorThrown)
+                    }
+                });
+            }
+        }
+
+        document.onchange = (e) => {
+            if (e.target.className == 'form-control quantity-to-buy') {
+                for (let index = 0; index < state.cart.length; index++) {
+                    const infoItem = state.cart[index];
+                    if (infoItem.productID === e.target.getAttribute('data-id')) {
+                        state.cart[index].quantity = e.target.value
+                    }
+                }
+                state.total = computeTotal(state.cart)
+                document.querySelector('#total_area').innerHTML = formatter.format(state.total)
+
+            }
+        }
+
+        function computeTotal(cart) {
+            var total = 0
+
+            for (let index = 0; index < cart.length; index++) {
+                const item = cart[index];
+                total += item.quantity * Number(item.price)
+            }
+
+            return total
+        }
+
+        const formatter = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD'
+        });
+    </script>
+</body>
+</html>

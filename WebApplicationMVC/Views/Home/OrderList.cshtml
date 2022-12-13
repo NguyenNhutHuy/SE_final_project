@@ -1,0 +1,89 @@
+﻿@model IEnumerable<WebApplicationMVC.Models.OrderClass>
+
+@{
+    ViewBag.Title = "OrderList";
+}
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-3">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Order <span style="font-size:13px">for agent</span></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="/Home/OrderList">Your history</a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="#">Hi! @HttpContext.Current.Session["username"].ToString()</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="/Home/Logout">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<h2 class="text-center"> Your history</h2>
+<table border="1" cellpadding="10" cellspacing="10" style="border-collapse: collapse; margin: auto; 
+    height: 550px; width:550px; overflow-y: scroll; display: block;">
+    <tr class="header" style="border: none">
+        <td>Order ID</td>
+        <td>OrderDate</td>
+
+        <td>Total</td>
+        <td>state</td>
+    </tr>
+
+    @foreach (var order in Model)
+    {
+        <tr>
+
+            <td>
+                <a href="#" data-id="@order.OrderID" class="show-agent-order-detail">@order.OrderID</a>
+            </td>
+            <td>@order.OrderDate</td>
+            <td>
+                @string.Format("{0:C}", @order.Total)
+            </td>
+            <td>
+                @if (@order.State == "waiting confirm")
+                {
+                    <span class="badge rounded-pill bg-primary text-dark">@order.State</span>
+                }
+
+                @if (@order.State == "delivering")
+                {
+                    <span class="badge rounded-pill bg-warning text-dark">@order.State</span>
+                }
+
+                @if (@order.State == "payment success")
+                {
+                    <span class="badge rounded-pill bg-success text-dark">@order.State</span>
+                }
+
+
+                @if (@order.State == "cancel")
+                {
+                    <span class="badge rounded-pill bg-danger text-dark">@order.State</span>
+                }
+            </td>
+        </tr>
+    }
+
+</table>
+
+
+<hr />
+<footer class="ps-3">
+    <p>&copy; @DateTime.Now.Year - Luan Huy Co.,Ltd</p>
+</footer>
+
+
+
